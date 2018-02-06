@@ -83,6 +83,8 @@ public class BlogPostingResource
 			"publishedDate", BlogsEntry::getLastPublishDate
 		).addLink(
 			"license", "https://creativecommons.org/licenses/by/4.0"
+		).addLinkedModel(
+			"creator", PersonId.class, blogsEntry -> blogsEntry.getUserId()
 		).addString(
 			"alternativeHeadline", BlogsEntry::getSubtitle
 		).addString(
