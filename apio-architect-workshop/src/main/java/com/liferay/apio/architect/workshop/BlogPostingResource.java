@@ -17,11 +17,12 @@ package com.liferay.apio.architect.workshop;
 import com.liferay.apio.architect.pagination.PageItems;
 import com.liferay.apio.architect.pagination.Pagination;
 import com.liferay.apio.architect.representor.Representor;
-import com.liferay.apio.architect.resource.CollectionResource;
-import com.liferay.apio.architect.routes.CollectionRoutes;
+import com.liferay.apio.architect.resource.NestedCollectionResource;
 import com.liferay.apio.architect.routes.ItemRoutes;
+import com.liferay.apio.architect.routes.NestedCollectionRoutes;
 import com.liferay.blogs.kernel.exception.NoSuchEntryException;
 import com.liferay.blogs.kernel.model.BlogsEntry;
+import com.liferay.blogs.kernel.model.BlogsEntryModel;
 import com.liferay.blogs.kernel.service.BlogsEntryService;
 import com.liferay.portal.kernel.exception.PortalException;
 import com.liferay.portal.kernel.security.auth.PrincipalException;
@@ -40,11 +41,12 @@ import org.osgi.service.component.annotations.Reference;
  */
 @Component(immediate = true)
 public class BlogPostingResource
-	implements CollectionResource<BlogsEntry, Long, BlogPostingId> {
+	implements NestedCollectionResource
+		<BlogsEntry, Long, BlogPostingId, Long, WebSiteId> {
 
 	@Override
-	public CollectionRoutes<BlogsEntry> collectionRoutes(
-		CollectionRoutes.Builder<BlogsEntry> builder) {
+	public NestedCollectionRoutes<BlogsEntry, Long> collectionRoutes(
+		NestedCollectionRoutes.Builder<BlogsEntry, Long> builder) {
 
 		return builder.addGetter(
 			this::_getPageItems
@@ -73,6 +75,8 @@ public class BlogPostingResource
 			"BlogPosting"
 		).identifier(
 			BlogsEntry::getEntryId
+		).addBidirectionalModel(
+			"webSite", "blogs", WebSiteId.class, BlogsEntryModel::getGroupId
 		).addDate(
 			"createDate", BlogsEntry::getCreateDate
 		).addDate(
@@ -111,19 +115,21 @@ public class BlogPostingResource
 		}
 	}
 
-	private PageItems<BlogsEntry> _getPageItems(Pagination pagination) {
+	private PageItems<BlogsEntry> _getPageItems(
+		Pagination pagination, Long groupId) {
+
 		List<BlogsEntry> blogsEntries;
 
 		try {
 			blogsEntries = _blogsService.getGroupEntries(
-				20143, 0, pagination.getStartPosition(),
+				groupId, 0, pagination.getStartPosition(),
 				pagination.getEndPosition());
 		}
 		catch (SecurityException se) {
 			throw new NotAuthorizedException(se);
 		}
 
-		int count = _blogsService.getGroupEntriesCount(20143, 0);
+		int count = _blogsService.getGroupEntriesCount(groupId, 0);
 
 		return new PageItems<>(blogsEntries, count);
 	}
