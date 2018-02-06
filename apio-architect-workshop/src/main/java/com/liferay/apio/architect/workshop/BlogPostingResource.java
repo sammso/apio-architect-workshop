@@ -66,6 +66,26 @@ public class BlogPostingResource
 			"BlogPosting"
 		).identifier(
 			BlogsEntry::getEntryId
+		).addDate(
+			"createDate", BlogsEntry::getCreateDate
+		).addDate(
+			"displayDate", BlogsEntry::getDisplayDate
+		).addDate(
+			"modifiedDate", BlogsEntry::getModifiedDate
+		).addDate(
+			"publishedDate", BlogsEntry::getLastPublishDate
+		).addLink(
+			"license", "https://creativecommons.org/licenses/by/4.0"
+		).addString(
+			"alternativeHeadline", BlogsEntry::getSubtitle
+		).addString(
+			"articleBody", BlogsEntry::getContent
+		).addString(
+			"description", BlogsEntry::getDescription
+		).addString(
+			"fileFormat", __ -> "text/html"
+		).addString(
+			"headline", BlogsEntry::getTitle
 		).build();
 	}
 
