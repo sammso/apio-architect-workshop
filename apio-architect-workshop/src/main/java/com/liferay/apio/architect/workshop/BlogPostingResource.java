@@ -14,13 +14,19 @@
 
 package com.liferay.apio.architect.workshop;
 
+import com.liferay.apio.architect.pagination.PageItems;
+import com.liferay.apio.architect.pagination.Pagination;
 import com.liferay.apio.architect.representor.Representor;
 import com.liferay.apio.architect.resource.CollectionResource;
 import com.liferay.apio.architect.routes.CollectionRoutes;
 import com.liferay.apio.architect.routes.ItemRoutes;
 import com.liferay.blogs.kernel.model.BlogsEntry;
+import com.liferay.blogs.kernel.service.BlogsEntryService;
+
+import java.util.List;
 
 import org.osgi.service.component.annotations.Component;
+import org.osgi.service.component.annotations.Reference;
 
 /**
  * @author Alejandro Hernández
@@ -33,7 +39,9 @@ public class BlogPostingResource
 	public CollectionRoutes<BlogsEntry> collectionRoutes(
 		CollectionRoutes.Builder<BlogsEntry> builder) {
 
-		return null;
+		return builder.addGetter(
+			this::_getPageItems
+		).build();
 	}
 
 	@Override
@@ -58,5 +66,18 @@ public class BlogPostingResource
 			BlogsEntry::getEntryId
 		).build();
 	}
+
+	private PageItems<BlogsEntry> _getPageItems(Pagination pagination) {
+		List<BlogsEntry> blogsEntries = _blogsService.getGroupEntries(
+			20143, 0, pagination.getStartPosition(),
+			pagination.getEndPosition());
+
+		int count = _blogsService.getGroupEntriesCount(20143, 0);
+
+		return new PageItems<>(blogsEntries, count);
+	}
+
+	@Reference
+	private BlogsEntryService _blogsService;
 
 }
