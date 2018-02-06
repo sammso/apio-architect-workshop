@@ -20,12 +20,17 @@ import com.liferay.apio.architect.representor.Representor;
 import com.liferay.apio.architect.resource.CollectionResource;
 import com.liferay.apio.architect.routes.CollectionRoutes;
 import com.liferay.apio.architect.routes.ItemRoutes;
+import com.liferay.blogs.kernel.exception.NoSuchEntryException;
 import com.liferay.blogs.kernel.model.BlogsEntry;
 import com.liferay.blogs.kernel.service.BlogsEntryService;
+import com.liferay.portal.kernel.exception.PortalException;
+import com.liferay.portal.kernel.security.auth.PrincipalException;
 
 import java.util.List;
 
 import javax.ws.rs.NotAuthorizedException;
+import javax.ws.rs.NotFoundException;
+import javax.ws.rs.ServerErrorException;
 
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
@@ -55,7 +60,9 @@ public class BlogPostingResource
 	public ItemRoutes<BlogsEntry> itemRoutes(
 		ItemRoutes.Builder<BlogsEntry, Long> builder) {
 
-		return null;
+		return builder.addGetter(
+			this::_getBlogsEntry
+		).build();
 	}
 
 	@Override
@@ -87,6 +94,19 @@ public class BlogPostingResource
 		).addString(
 			"headline", BlogsEntry::getTitle
 		).build();
+	}
+
+	private BlogsEntry _getBlogsEntry(Long entryId) {
+		try {
+			return _blogsService.getEntry(entryId);
+		}
+		catch (NoSuchEntryException | PrincipalException e) {
+			throw new NotFoundException(
+				"Unable to get blogs entry " + entryId, e);
+		}
+		catch (PortalException pe) {
+			throw new ServerErrorException(500, pe);
+		}
 	}
 
 	private PageItems<BlogsEntry> _getPageItems(Pagination pagination) {
