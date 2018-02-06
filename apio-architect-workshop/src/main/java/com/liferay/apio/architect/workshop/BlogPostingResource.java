@@ -25,6 +25,8 @@ import com.liferay.blogs.kernel.service.BlogsEntryService;
 
 import java.util.List;
 
+import javax.ws.rs.NotAuthorizedException;
+
 import org.osgi.service.component.annotations.Component;
 import org.osgi.service.component.annotations.Reference;
 
@@ -68,9 +70,16 @@ public class BlogPostingResource
 	}
 
 	private PageItems<BlogsEntry> _getPageItems(Pagination pagination) {
-		List<BlogsEntry> blogsEntries = _blogsService.getGroupEntries(
-			20143, 0, pagination.getStartPosition(),
-			pagination.getEndPosition());
+		List<BlogsEntry> blogsEntries;
+
+		try {
+			blogsEntries = _blogsService.getGroupEntries(
+				20143, 0, pagination.getStartPosition(),
+				pagination.getEndPosition());
+		}
+		catch (SecurityException se) {
+			throw new NotAuthorizedException(se);
+		}
 
 		int count = _blogsService.getGroupEntriesCount(20143, 0);
 
