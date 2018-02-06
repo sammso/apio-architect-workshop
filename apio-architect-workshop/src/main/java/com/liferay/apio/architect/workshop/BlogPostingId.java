@@ -14,9 +14,10 @@
 
 package com.liferay.apio.architect.workshop;
 
+import com.liferay.apio.architect.identifier.Identifier;
+
 /**
  * @author Alejandro Hernández
  */
-public class Resource {
-
+public interface BlogPostingId extends Identifier<Long> {
 }
